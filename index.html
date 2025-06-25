@@ -29,7 +29,7 @@
   - Resize Agent_icon to 256x256px
   - Add their name to the role() function -->
   <video playsinline autoplay muted loop id="bgvid">
-    <source src="img/vid.mp4" />
+    <source src="img/bg.mp4" />
   </video>
   <noscript>This website requires JavaScript to function properly</noscript>
   <div class="logo">
@@ -313,33 +313,177 @@
   <div class="credits">
     <p style="margin: 0" align="center">Based on <a href="https://schoch.co.nz/valorant" style="color: #FF4655; text-decoration: none;" target="_blank">Valoroulette</a></p>
     <p style="margin: 0" align="center">Made by <a href="https://tracker.gg/valorant/profile/riot/gleb123%235678/overview" style="color: #FF4655; text-decoration: none;" target="_blank">Businessman381</a></p>
-      <!--<p style="margin: 4px">
-        <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-        <script type='text/javascript'>kofiwidget2.init('Support author on Ko-fi', '#29abe0', 'E1E0FMCOW'); kofiwidget2.draw();</script>
-      </p>-->
-    </div>
-    <script>
-      let agentSlots = document.querySelectorAll(".agent_slot");
-      let rollButton = document.querySelector(".rollbutton");
-      let goBack = document.querySelector(".goBack");
-      let cardWrapper = document.querySelector('.card_wrapper');
-      let cards = document.querySelectorAll(".card_container");
-      let current = [];
-      let del = document.querySelector(".controls_del");
-      let counter = document.querySelector(".controls_counter");
-      let add = document.querySelector(".controls_add");
-      let showRoles = document.querySelector(".options_showRoles");
-      let rolesShown = false;
-      let isPortrait = window.matchMedia("(orientation: portrait)").matches;
-      window.matchMedia("(orientation: portrait)").addEventListener("change", (e) => {
-        window.location.reload();
-        isPortrait = e.matches;
-      });
-      let isCardScreen = false;
+  </div>
+  <script>
 
-      let count = 0;
+    let agentSlots = document.querySelectorAll(".agent_slot");
+    let rollButton = document.querySelector(".rollbutton");
+    let goBack = document.querySelector(".goBack");
+    let cardWrapper = document.querySelector(".card_wrapper");
+    let cards = document.querySelectorAll(".card_container");
+    let del = document.querySelector(".controls_del");
+    let counter = document.querySelector(".controls_counter");
+    let add = document.querySelector(".controls_add");
+    let showRoles = document.querySelector(".options_showRoles");
+
+    let currentRolled = [];
+
+    let rolesShown = false;
+
+    let controllers = ["Astra", "Brimstone", "Clove", "Harbor", "Omen", "Viper"];
+    let duelists = ["Iso", "Jett", "Neon", "Phoenix", "Raze", "Reyna", "Waylay", "Yoru"];
+    let initiators = ["Breach", "Fade", "Gekko", "Kayo", "Skye", "Sova", "Tejo"];
+    let sentinels = ["Chamber", "Cypher", "Deadlock", "Killjoy", "Sage", "Vyse"];
+
+    let agents = [...controllers, ...duelists, ...initiators, ...sentinels];
+
+    let isPortrait = window.matchMedia("(orientation: portrait)").matches;
+    window.matchMedia("(orientation: portrait)").addEventListener("change", (e) => {
+      window.location.reload();
+      isPortrait = e.matches;
+    });
+
+    let isCardScreen = false;
+
+    let count = 0;
+    if (isPortrait) {
+      addCard(6);
+      let i = 6;
+      Array.from(cards).forEach(function(card) {
+        let offsetX = "";
+        let offsetY = "";
+        if ([1, 3, 5].includes(i)) offsetX = "translateX(-54%)";
+        else offsetX = "translateX(54%)";
+        if ([1, 2].includes(i)) offsetY = "translateY(-105.3%)";
+        else if ([5, 6].includes(i)) offsetY = "translateY(105.3%)";
+        card.style.transform = offsetX + offsetY;
+        i--;
+      });
+    } else addCard(3);
+    counter.textContent = count;
+
+    // Preloading images
+    function preload(url) {
+      const img = new Image();
+      img.src = url;
+    }
+
+    agents.forEach((a) => {
+      preload("img/webp/" + a + "_full.webp");
+      preload("img/webp/" + a + "_name.webp");
+      preload("img/webp/" + a + "_icon.webp");
+    });
+    preload("img/webp/role_controller_blue.webp");
+    preload("img/webp/role_duelist_blue.webp");
+    preload("img/webp/role_initiator_blue.webp");
+    preload("img/webp/role_sentinel_blue.webp");
+    preload("img/webp/bg.webp");
+
+    function randomAgent() {
+      let unlocked = [];
+      agentSlots.forEach(function(slot) {
+        if (!slot.classList.contains("locked")) {
+          let agent = slot.classList[1].replace("agent_", "");
+          unlocked.push(agent);
+        }
+      });
+      let rolled = null;
+      if (unlocked.length >= count) {
+        let toRoll = [];
+        unlocked.forEach(function(agent) {
+          if (!currentRolled.includes(agent)) toRoll.push(agent);
+        });
+        rolled = toRoll[Math.floor(Math.random() * toRoll.length)];
+      } else rolled = unlocked[Math.floor(Math.random() * unlocked.length)];
+      return(rolled);
+    }
+
+    function role(agent) {
+      let role = "Unknown";
+      if (controllers.includes(agent))
+        role = "controller";
+      else if (duelists.includes(agent))
+        role = "duelist";
+      else if (initiators.includes(agent))
+        role = "initiator";
+      else if (sentinels.includes(agent))
+        role = "sentinel";
+      return(role);
+    }
+
+    function toggleRoles() {
+      let o = 0;
+      if (!rolesShown) {
+        o = 0.8;
+        rolesShown = true;
+      } else rolesShown = false;
+      cards.forEach(function(card) {
+        card.querySelector(".agent_role").style.opacity = o;
+      });
+    }
+
+    // locking and unlocking slots
+    agentSlots.forEach(function(icon) {
+      icon.addEventListener("click", function() {
+        lockedAgents = document.querySelectorAll(".locked");
+        if (this.classList.contains("locked")) this.classList.remove("locked");
+        else if (agentSlots.length - lockedAgents.length <= 2) {
+            // shake animation
+          this.classList.remove("invalidSlot");
+          this.offsetWidth;
+          this.classList.add("invalidSlot");
+            //
+        } else this.classList.add("locked");
+      });
+    });
+
+    // Roll button function
+    let rollLocked = false;
+    rollButton.addEventListener("click", function() {
+      if (rollLocked) return;
+      rollLocked = true;
+        // roll function
+      setTimeout(function() {
+        currentRolled = [];
+        cards.forEach(function(card) {
+          let agent = randomAgent();
+          currentRolled.push(agent);
+          card.querySelector(".agent_full").src = "img/webp/" + agent + "_full.webp";
+          card.querySelector(".agent_name").src = "img/webp/" + agent + "_name.webp";
+          card.classList.replace(card.classList.item(1), agent);
+          card.querySelector(".agent_role").style.maskImage = "url('img/webp/role_" + role(agent) + ".webp')";
+        });
+        console.log(currentRolled);
+      }, 600);
+      // Roll animation
       if (isPortrait) {
-        addCard(6);
+        if (!isCardScreen) {
+          isCardScreen = true;
+          let agentWrapper = document.querySelector(".agent_icon_wrapper");
+          agentWrapper.style.opacity = 0;
+          agentWrapper.style.zIndex = -1;
+          let guide = document.querySelector("#p_guide");
+          guide.style.opacity = 0;
+          guide.style.zIndex = -1;
+          let left = document.querySelector(".left_container");
+          left.style.pointerEvents = "none";
+          let right = document.querySelector(".right_container");
+          right.style.opacity = 1;
+          right.style.pointerEvents = "auto";
+          let logo = document.querySelector(".logo");
+          logo.style.opacity = 0;
+          let credits = document.querySelector(".credits");
+          credits.style.opacity = 0;
+          credits.style.zIndex = -1;
+          rollButton.style.fontSize = "min(18vw, 7svh)";
+          let controlsContainer = document.querySelector(".controls_container");
+          controlsContainer.style.top = "min(87%, calc(212vw - 7svh))";
+          setTimeout(function() {
+            showRoles.style.transform = "translateX(min(14svh, 34vw))";
+            goBack.style.transform = "translateX(max(-17svh, -35vw)) translateY(-50%)";
+          }, 400);
+        }
+        // Card part
         let i = 6;
         Array.from(cards).forEach(function(card) {
           let offsetX = "";
@@ -349,182 +493,59 @@
           if ([1, 2].includes(i)) offsetY = "translateY(-105.3%)";
           else if ([5, 6].includes(i)) offsetY = "translateY(105.3%)";
           card.style.transform = offsetX + offsetY;
+          setTimeout(function() {
+            card.style.transition = "all 500ms ease-in-out";
+            card.style.transform += "rotateZ(360deg)";
+          }, 350 + i * 15);
+          setTimeout(function() {
+            card.style.transition = "none"
+            card.style.transform = offsetX + offsetY + "rotateZ(0deg)";
+          }, 850 + i * 15);
+          setTimeout(() => {
+            card.style.transition = "";
+            card.style.transform = "";
+          }, 1100);
           i--;
         });
-      } else addCard(3);
-      counter.textContent = count;
-
-      function randomAgent() {
-        let unlocked = [];
-        agentSlots.forEach(function(slot) {
-          if (!slot.classList.contains("locked")) {
-            let agent = slot.classList[1].replace("agent_", "");
-            unlocked.push(agent);
-          }
-        });
-        let rolled = null;
-        if (unlocked.length >= count) {
-          let toRoll = [];
-          unlocked.forEach(function(agent) {
-            if (!current.includes(agent)) toRoll.push(agent);
-          });
-          rolled = toRoll[Math.floor(Math.random() * toRoll.length)];
-        } else rolled = unlocked[Math.floor(Math.random() * unlocked.length)];
-        return(rolled);
-      }
-
-      function role(agent) {
-        let role = "Unknown";
-        let controllers = ["Astra", "Brimstone", "Clove", "Harbor", "Omen", "Viper"];
-        let duelists = ["Iso", "Jett", "Neon", "Phoenix", "Raze", "Reyna", "Waylay", "Yoru"];
-        let initiators = ["Breach", "Fade", "Gekko", "Kayo", "Skye", "Sova", "Tejo"];
-        let sentinels = ["Chamber", "Cypher", "Deadlock", "Killjoy", "Sage", "Vyse"];
-        if (controllers.includes(agent))
-          role = "controller";
-        else if (duelists.includes(agent))
-          role = "duelist";
-        else if (initiators.includes(agent))
-          role = "initiator";
-        else if (sentinels.includes(agent))
-          role = "sentinel";
-        return(role);
-      }
-
-      function toggleRoles() {
-        let o = 0;
-        if (!rolesShown) {
-          o = 0.8;
-          rolesShown = true;
-        } else rolesShown = false;
-        cards.forEach(function(card) {
-          card.querySelector(".agent_role").style.opacity = o;
-        });
-      }
-
-      // locking and unlocking slots
-      agentSlots.forEach(function(icon) {
-        icon.addEventListener("click", function() {
-          lockedAgents = document.querySelectorAll(".locked");
-          if (this.classList.contains("locked")) this.classList.remove("locked");
-          else if (agentSlots.length - lockedAgents.length <= 2) {
-            // shake animation
-            this.classList.remove("invalidSlot");
-            this.offsetWidth;
-            this.classList.add("invalidSlot");
-            //
-          } else this.classList.add("locked");
-        });
-      });
-
-      // Roll button function
-      let rollLocked = false;
-      rollButton.addEventListener("click", function() {
-        if (rollLocked) return;
-        rollLocked = true;
-        // roll function
-        setTimeout(function() {
-          current = [];
-          cards.forEach(function(card) {
-            let agent = randomAgent();
-            current.push(agent);
-            card.querySelector(".agent_full").src = "img/webp/" + agent + "_full.webp";
-            card.querySelector(".agent_name").src = "img/webp/" + agent + "_name.webp";
-            card.classList.replace(card.classList.item(1), agent);
-            card.querySelector(".agent_role").style.maskImage = "url('img/webp/role_" + role(agent) + ".webp')";
-          });
-          console.log(current);
-        }, 600);
-        // Roll animation
-        if (isPortrait) {
-          if (!isCardScreen) {
-            isCardScreen = true;
-            let agentWrapper = document.querySelector(".agent_icon_wrapper");
-            agentWrapper.style.opacity = 0;
-            agentWrapper.style.zIndex = -1;
-            let guide = document.querySelector("#p_guide");
-            guide.style.opacity = 0;
-            guide.style.zIndex = -1;
-            let left = document.querySelector(".left_container");
-            left.style.pointerEvents = "none";
-            let right = document.querySelector(".right_container");
-            right.style.opacity = 1;
-            right.style.pointerEvents = "auto";
-            let logo = document.querySelector(".logo");
-            logo.style.opacity = 0;
-            let credits = document.querySelector(".credits");
-            credits.style.opacity = 0;
-            credits.style.zIndex = -1;
-            rollButton.style.fontSize = "min(18vw, 7svh)";
-            let controlsContainer = document.querySelector(".controls_container");
-            controlsContainer.style.top = "min(87%, calc(212vw - 7svh))";
-            setTimeout(function() {
-              showRoles.style.transform = "translateX(min(14svh, 34vw))";
-              goBack.style.transform = "translateX(max(-17svh, -35vw)) translateY(-50%)";
-            }, 400);
-          }
-          // Card part
-          let i = 6;
-          Array.from(cards).forEach(function(card) {
-            let offsetX = "";
-            let offsetY = "";
-            if ([1, 3, 5].includes(i)) offsetX = "translateX(-54%)";
-            else offsetX = "translateX(54%)";
-            if ([1, 2].includes(i)) offsetY = "translateY(-105.3%)";
-            else if ([5, 6].includes(i)) offsetY = "translateY(105.3%)";
-            card.style.transform = offsetX + offsetY;
-            setTimeout(function() {
-              card.style.transition = "all 500ms ease-in-out";
-              card.style.transform += "rotateZ(360deg)";
-            }, 350 + i * 15);
-            setTimeout(function() {
-              card.style.transition = "none"
-              card.style.transform = offsetX + offsetY + "rotateZ(0deg)";
-            }, 850 + i * 15);
-            setTimeout(() => {
-              card.style.transition = "";
-              card.style.transform = "";
-            }, 1100);
-            i--;
-          });
-        } else {
-          // !!! REVERSED !!!
-          let i = 0;
-          Array.from(cards).slice().reverse().forEach(function(card) {
-            let offsetX = cards.length/2 - i - 0.5;
-            let offset = "translateX(" + offsetX*222*-1 + "px)";
-            if (cards.length > 5) {
+      } else {
+        // !!! REVERSED !!!
+        let i = 0;
+        Array.from(cards).slice().reverse().forEach(function(card) {
+          let offsetX = cards.length/2 - i - 0.5;
+          let offset = "translateX(" + offsetX*222*-1 + "px)";
+          if (cards.length > 5) {
               // top row
-              if (i > cards.length-5) {
-                offsetX = cards.length/2 - i + (cards.length-5)*0.5;
-                offset = "translateX(" + offsetX*222*-1 + "px) translateY(161px)";
+            if (i > cards.length-5) {
+              offsetX = cards.length/2 - i + (cards.length-5)*0.5;
+              offset = "translateX(" + offsetX*222*-1 + "px) translateY(161px)";
 
-              }
-              // bottom row
-              else {
-                offsetX = (cards.length-4)/2 - i - 0.5;
-                offset = "translateX(" + offsetX*222*-1 + "px) translateY(-161px)";
-              }
             }
-            card.style.transform = offset;
-            setTimeout(function() {
-              card.style.transition = "all 500ms ease-in-out";
-              card.style.transform = offset + "rotateZ(360deg)";
-            }, 350 + i/(cards.length-1)*75);
-            setTimeout(function() {
-              card.style.transition = "none"
-              card.style.transform = offset + "rotateZ(0deg)";
-            }, 850 + i/(cards.length-1)*75);
-            setTimeout(function() {
-              card.style.transition = "all 250ms ease";
-              card.style.transform = "translateX(0px)";
-            }, 1000 + cards.length/cards.length*75);
-            i++;
-          }); 
-        }
-        setTimeout(function() {
-          rollLocked = false;
-        }, 1500);
-      });
+            // bottom row
+            else {
+              offsetX = (cards.length-4)/2 - i - 0.5;
+              offset = "translateX(" + offsetX*222*-1 + "px) translateY(-161px)";
+            }
+          }
+          card.style.transform = offset;
+          setTimeout(function() {
+            card.style.transition = "all 500ms ease-in-out";
+            card.style.transform = offset + "rotateZ(360deg)";
+          }, 350 + i/(cards.length-1)*75);
+          setTimeout(function() {
+            card.style.transition = "none"
+            card.style.transform = offset + "rotateZ(0deg)";
+          }, 850 + i/(cards.length-1)*75);
+          setTimeout(function() {
+            card.style.transition = "all 250ms ease";
+            card.style.transform = "translateX(0px)";
+          }, 1000 + cards.length/cards.length*75);
+          i++;
+        }); 
+      }
+      setTimeout(function() {
+        rollLocked = false;
+      }, 1500);
+    });
 
 function addCard(a) {
   if (cards.length > 8) return;
@@ -532,8 +553,8 @@ function addCard(a) {
     for (let i = 0; i < a; i++) {
       count++;
       let agent = randomAgent();
-      current.push(agent);
-            //element editing
+      currentRolled.push(agent);
+      //element editing
       let cardContainer = document.createElement('div');
       cardContainer.classList.add('card_container');
       let card = document.createElement('div');
@@ -559,7 +580,7 @@ function addCard(a) {
       front.appendChild(agentRole);
       card.appendChild(front);
       card.appendChild(back);
-            //containers
+      //containers
       cardContainer.appendChild(card);
       cardWrapper.appendChild(cardContainer);
       cards = document.querySelectorAll(".card_container");
@@ -573,14 +594,14 @@ function addCard(a) {
       if (rolesShown) cards[count-1].querySelector(".agent_role").style.opacity = 0.8;
     }
   }
-  console.log(current);
+  console.log(currentRolled);
 }
 
 function removeCard() {
   if (cards.length > 2) {
     cardWrapper.removeChild(cards[cards.length - 1]);
     cards = document.querySelectorAll(".card_container");
-    current.splice(current.length - 1, 1);
+    currentRolled.splice(currentRolled.length - 1, 1);
     count--;
   }
 }
