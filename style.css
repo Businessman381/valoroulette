@@ -483,12 +483,25 @@ p {
 }
 
 .controls_del, .controls_add {
-  margin: 0px 4px;
-  font-size: 24px;
+  font-size: 35px;
   cursor: pointer;
-  transform: translateY(-5px);
+  transform: translateY(-6px);
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  color: black;
+  background-color: white;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+}
+
+.controls_del.disabled, .controls_add.disabled {
+  outline-color: white;
+  color: white;
+  background-color: transparent;
+  cursor: default;
 }
 
 .controls_counter {
@@ -535,7 +548,6 @@ p {
   width: 16px;
   height: 16px;
   margin-right: 10px;
-  transform: translateY(-2px);
   cursor: pointer;
 }
 
@@ -544,10 +556,10 @@ p {
 }
 
 .counter_container {
-  margin-top: 16px;
+  margin-top: 18px;
   display: flex;
   flex-direction: row;
-  transform: translateY(2px);
+  align-items: center;
 }
 
 .goBack {

@@ -291,7 +291,7 @@
       </div>
       <div class="controls">
         <div class="goBack">
-          <p>◀</p>
+          <p>⮜</p>
         </div>
         <div class="options">
           <div class="options_showRoles">
@@ -300,9 +300,9 @@
           <p>Show Roles</p>
         </div>
         <div class="counter_container">
-          <div class="controls_del">◀</div>
+          <div class="controls_del">-</div>
           <div class="controls_counter">3</div>
-          <div class="controls_add">▶</div>
+          <div class="controls_add">+</div>
         </div>
       </div>
     </div>
@@ -311,7 +311,7 @@
     </div>
   </div>
   <div class="credits">
-    <p style="margin: 0" align="center">Made by <a href="https://tracker.gg/valorant/profile/riot/gleb123%235678/overview" style="color: #FF4655; text-decoration: none;" target="_blank">Businessman381</a></p>
+    <p style="margin: 0" align="center">Made by <a href="https://tracker.gg/valorant/profile/riot/lexa123%23e621" style="color: #FF4655; text-decoration: none;" target="_blank">Businessman381</a></p>
   </div>
   <script>
 
@@ -343,6 +343,12 @@
     });
 
     let isCardScreen = false;
+
+    // applying preferences
+    agentSlots.forEach(function(agent) {
+      if (localStorage.getItem(agent.classList[1]) != null)
+         agent.classList.add("locked");
+    });
 
     let count = 0;
     if (isPortrait) {
@@ -422,17 +428,22 @@
     }
 
     // locking and unlocking slots
-    agentSlots.forEach(function(icon) {
-      icon.addEventListener("click", function() {
+    agentSlots.forEach(function(slot) {
+      slot.addEventListener("click", function() {
         lockedAgents = document.querySelectorAll(".locked");
-        if (this.classList.contains("locked")) this.classList.remove("locked");
-        else if (agentSlots.length - lockedAgents.length <= 2) {
+        if (this.classList.contains("locked")) {
+          this.classList.remove("locked");
+          localStorage.removeItem(this.classList[1]);
+        } else if (agentSlots.length - lockedAgents.length <= 2) {
             // shake animation
           this.classList.remove("invalidSlot");
           this.offsetWidth;
           this.classList.add("invalidSlot");
             //
-        } else this.classList.add("locked");
+        } else {
+          this.classList.add("locked");
+          localStorage.setItem(this.classList[1], "locked");
+        }
       });
     });
 
@@ -610,13 +621,11 @@ del.addEventListener("click", function() {
     removeCard();
     counter.textContent = count;
     if (count == 7) {
-      add.textContent = "▶";
-      add.style.cursor = "pointer";
+      add.classList.remove("disabled");
     } else if (count == 5)
     cardWrapper.style.width = "1110px";
     else if (count <= 2) {
-      del.textContent = "◁";
-      del.style.cursor = "auto";
+      del.classList.add("disabled");
     }
   }
 });
@@ -625,13 +634,11 @@ add.addEventListener("click", function() {
     addCard(1);
     counter.textContent = count;
     if (count == 3) {
-      del.textContent = "◀";
-      del.style.cursor = "pointer";
+      del.classList.remove("disabled");
     } else if (count == 6)
     cardWrapper.style.width = "910px";
     else if (count >= 8) {
-      add.textContent = "▷";
-      add.style.cursor = "auto";
+      add.classList.add("disabled");
     }
   }
 });

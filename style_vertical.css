@@ -573,7 +573,3 @@ p {
   font-size: min(12vw, 6svh);
   transition: transform 300ms ease;
 }
-
-.goBack p {
-  transform: scale(0.5, 1);
-}
