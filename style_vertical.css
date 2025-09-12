@@ -573,3 +573,12 @@ p {
   font-size: min(12vw, 6svh);
   transition: transform 300ms ease;
 }
+
+.backArrow {
+  width: 0px;
+  height: 0px;
+  border-style: solid;
+  border-width: 50px 50px 50px 0;
+  border-color: transparent white transparent transparent;
+  transform: translateX(-8px);
+}
